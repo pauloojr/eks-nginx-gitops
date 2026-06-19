@@ -205,11 +205,17 @@ curl http://localhost:8080
 - [x] Helm Chart
 - [x] Helm Upgrade
 
-### v1.0.0
+## v1.0.0
 
-- [ ] GitHub Actions
-- [ ] Helm Lint
-- [ ] Helm Template Validation
+- [x] Namespace
+- [x] Deployment
+- [x] Service
+- [x] ConfigMap
+- [x] Helm Chart
+- [x] Helm Upgrade
+- [x] GitHub Actions
+- [x] Helm Lint
+- [x] Helm Template Validation
 
 ### v1.1.0
 
