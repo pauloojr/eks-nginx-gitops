@@ -1,0 +1,42 @@
+name: Kubernetes CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Validate Helm Chart
+        run: |
+          helm lint helm/nginx-app
+
+      - name: Render Helm Templates
+        run: |
+          helm template nginx-app helm/nginx-app > rendered.yaml
+
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          kubectl apply \
+            --dry-run=client \
+            -f rendered.yaml
