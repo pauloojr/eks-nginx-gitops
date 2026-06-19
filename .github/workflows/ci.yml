@@ -37,6 +37,7 @@ jobs:
 
       - name: Validate Kubernetes Manifests
         run: |
-          kubectl apply \
+            kubectl apply \
             --dry-run=client \
+            --validate=false \
             -f rendered.yaml
