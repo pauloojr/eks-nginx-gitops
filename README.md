@@ -1,6 +1,6 @@
 # EKS Nginx GitOps
 
-Deploy de uma aplicação Nginx em Kubernetes utilizando manifests Kubernetes e Helm Charts.
+Deploy de uma aplicação Nginx em Kubernetes utilizando Kubernetes Manifests, Helm Charts, GitHub Actions e ArgoCD (GitOps).
 
 ## Objetivo
 
@@ -8,54 +8,55 @@ Este projeto foi criado para praticar conceitos de:
 
 - Kubernetes
 - Helm
-- GitOps Ready Structure
-- ConfigMaps
-- Deployments
-- Services
-- GitHub Actions (em evolução)
+- GitHub Actions
+- ArgoCD
+- GitOps
+- Continuous Delivery
+- Infrastructure Automation
+
+---
 
 ## Arquitetura
 
 ```text
-┌─────────────┐
-│   GitHub    │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│ Helm Chart  │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│ Kubernetes  │
-│ Deployment  │
-│ Service     │
-│ ConfigMap   │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│    Nginx    │
-└─────────────┘
+GitHub Repository
+        |
+        v
+   GitHub Actions
+        |
+        v
+      ArgoCD
+        |
+        v
+   Kubernetes Cluster
+        |
+        v
+       Nginx
 ```
+
+---
 
 ## Estrutura do Projeto
 
 ```text
-eks-nginx-gitops/
-├── .github/
-│   └── workflows/
-│       └── ci.yml
+eks-nginx-gitops
+├── .github/workflows
+│   └── ci.yml
 │
-├── helm/
-│   └── nginx-app/
-│       ├── Chart.yaml
-│       ├── values.yaml
-│       └── templates/
+├── app
+│   └── index.html
 │
-├── k8s/
+├── argocd
+│   └── nginx-app.yaml
+│
+├── helm/nginx-app
+│   ├── Chart.yaml
+│   ├── values.yaml
+│   └── templates
+│
+├── k8s
 │   ├── namespace.yaml
+│   ├── configmap.yaml
 │   ├── deployment.yaml
 │   ├── service.yaml
 │   └── ingress.yaml
@@ -63,180 +64,185 @@ eks-nginx-gitops/
 └── README.md
 ```
 
+---
+
 ## Tecnologias Utilizadas
 
-- Kubernetes
-- Helm
-- Docker
-- Kind
-- GitHub Actions
-- Nginx
+| Tecnologia | Finalidade |
+|------------|------------|
+| Kubernetes | Orquestração de containers |
+| Helm | Gerenciamento de aplicações |
+| ArgoCD | GitOps e Continuous Delivery |
+| GitHub Actions | CI Pipeline |
+| Nginx | Aplicação de demonstração |
+| Docker | Container Runtime |
 
-## Criando o Cluster Local
+---
 
-Instalar Kind:
+## Kubernetes Deployment
 
-```bash
-curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-amd64
-chmod +x kind
-sudo mv kind /usr/local/bin/
-```
+Aplicação implantada utilizando:
 
-Criar cluster:
+- Deployment
+- Service
+- ConfigMap
+- Namespace
 
-```bash
-kind create cluster --name devops-lab
-```
-
-Verificar:
-
-```bash
-kubectl get nodes
-```
-
-## Deploy com Kubernetes
-
-Criar namespace:
-
-```bash
-kubectl apply -f k8s/namespace.yaml
-```
-
-Aplicar deployment:
-
-```bash
-kubectl apply -f k8s/deployment.yaml
-```
-
-Aplicar service:
-
-```bash
-kubectl apply -f k8s/service.yaml
-```
-
-Verificar:
+Validação:
 
 ```bash
 kubectl get all -n nginx-app
 ```
 
-## Deploy com Helm
+---
 
-Validar chart:
+## Helm
+
+Validação do Chart:
 
 ```bash
 helm lint helm/nginx-app
 ```
 
-Renderizar templates:
+Renderização:
 
 ```bash
 helm template nginx-app helm/nginx-app
 ```
 
-Instalar chart:
+Instalação:
 
 ```bash
-helm install nginx-app helm/nginx-app \
-  -n nginx-app
+helm install nginx-app helm/nginx-app -n nginx-app
 ```
 
-Verificar release:
+Upgrade:
 
 ```bash
-helm list -n nginx-app
+helm upgrade nginx-app helm/nginx-app -n nginx-app
 ```
 
-## Upgrade da Aplicação
+---
 
-Editar:
+## GitHub Actions
+
+Pipeline responsável por:
+
+- Helm Lint
+- Manifest Validation
+- Template Rendering
+
+Workflow:
+
+```text
+Git Push
+    |
+    v
+GitHub Actions
+    |
+    +--> Helm Lint
+    +--> Render Templates
+    +--> Validate Manifests
+```
+
+---
+
+## ArgoCD GitOps
+
+Application configurada:
 
 ```yaml
-replicaCount: 3
+syncPolicy:
+  automated:
+    prune: true
+    selfHeal: true
 ```
 
-Executar:
+Recursos sincronizados automaticamente:
+
+- Namespace
+- ConfigMap
+- Deployment
+- Service
+
+Validação:
 
 ```bash
-helm upgrade nginx-app helm/nginx-app \
-  -n nginx-app
+kubectl get applications -n argocd
 ```
 
-Verificar:
+Resultado esperado:
 
-```bash
-kubectl get pods -n nginx-app
+```text
+NAME       SYNC STATUS   HEALTH STATUS
+nginx-app  Synced        Healthy
 ```
 
-## Acessando a Aplicação
+---
 
-Port Forward:
+## GitOps Flow
 
-```bash
-kubectl port-forward \
-  -n nginx-app \
-  svc/nginx 8080:80
+```text
+Developer
+    |
+    v
+Git Push
+    |
+    v
+GitHub
+    |
+    v
+ArgoCD
+    |
+    v
+Kubernetes
 ```
 
-Acessar:
+Qualquer alteração realizada no Git é sincronizada automaticamente pelo ArgoCD.
 
-```bash
-curl http://localhost:8080
-```
+---
 
-## Funcionalidades Implementadas
+## Releases
 
-- Namespace Kubernetes
-- Deployment Nginx
-- Service ClusterIP
-- ConfigMap para conteúdo customizado
-- Helm Chart
-- Helm Upgrade
-- Escalabilidade via réplicas
+### v1.0.0
 
-## Roadmap
+- Kubernetes
+- Helm
+- GitHub Actions
 
-### v0.4.0
+### v2.0.0
 
-- [x] Namespace
-- [x] Deployment
-- [x] Service
-- [x] ConfigMap
-- [x] Helm Chart
-- [x] Helm Upgrade
+- ArgoCD
+- GitOps
+- Self Heal
+- Automated Sync
+- ConfigMap managed through Git
 
-## v1.0.0
+---
 
-- [x] Namespace
-- [x] Deployment
-- [x] Service
-- [x] ConfigMap
-- [x] Helm Chart
-- [x] Helm Upgrade
-- [x] GitHub Actions
-- [x] Helm Lint
-- [x] Helm Template Validation
+## Próximos Passos
 
-### v1.1.0
+- Ingress Controller
+- Deploy em Amazon EKS
+- ExternalDNS
+- Cert-Manager
+- TLS com Let's Encrypt
+- Observabilidade com Prometheus e Grafana
 
-- [ ] NGINX Ingress Controller
-
-### v1.2.0
-
-- [ ] ArgoCD GitOps
-
-### v1.3.0
-
-- [ ] Deploy em Amazon EKS
+---
 
 ## Autor
 
-Paulo Júnior
+**Paulo Júnior**
 
-DevOps Engineer em formação
+DevOps Engineer | Cloud Engineer
 
-LinkedIn:
-https://www.linkedin.com/in/paulojúnior
+Tecnologias:
 
-GitHub:
-https://github.com/pauloojr
+- AWS
+- Terraform
+- Kubernetes
+- Docker
+- GitHub Actions
+- ArgoCD
+- GitOps
