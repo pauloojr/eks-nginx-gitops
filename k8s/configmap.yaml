@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: nginx-html
+  namespace: nginx-app
+
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>EKS Nginx GitOps</title>
+    </head>
+    <body>
+
+      <h1>Paulo Júnior</h1>
+      <h2>DevOps Engineer</h2>
+
+      <p>Kubernetes Deployment running successfully.</p>
+
+      <ul>
+        <li>Docker</li>
+        <li>Kubernetes</li>
+        <li>Helm</li>
+        <li>GitHub Actions</li>
+        <li>GitOps</li>
+      </ul>
+
+    </body>
+    </html>
